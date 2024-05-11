@@ -1,4 +1,4 @@
-name: Challan AS - Deploy to EKS
+name: Challan - Deploy to EKS
 
 on:
   push:
@@ -45,3 +45,4 @@ jobs:
         IMAGE_TAG: ${{ steps.commit.outputs.short }}
       run: |
         kubectl apply -f deployments/challan_as/deployment.yaml
+        kubectl apply -f deployments/challan_ws_public/deployment.yaml
