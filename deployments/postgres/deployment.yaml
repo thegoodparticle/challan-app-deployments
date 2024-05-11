@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: postgres-deployment
+  labels:
+    app: postgres
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers: 
+        - name: postgres
+          image: bitnami/postgresql:latest
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRESQL_PASSWORD
+              value: "mypwd"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: default
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      # Pod Port within the cluster
+      port: 5432
+      # targetPort is application listening port or containerPort
+      targetPort: 5432  
+  type: NodePort

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: kafka-deployment
+  labels:
+    app: kafka
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      hostname: kafka
+      containers: 
+        - name: kafka
+          image: bitnami/kafka:latest
+          resources:
+            requests:
+              memory: "2Gi"
+            limits:
+              memory: "2Gi"
+          ports:
+            - containerPort: 9092
+          env:
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx1G -Xms1G"
+            - name: KAFKA_ADVERTISED_PORT
+              value: "9092"
+            - name: KAFKA_ADVERTISED_HOST_NAME
+              value: kafka
+            - name: KAFKA_CFG_NODE_ID
+              value: "0"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "controller,broker"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:9092,CONTROLLER://:9093"     
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "0@kafka:9093"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"                  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: default
+spec:
+  selector:
+    app: kafka
+  ports:
+    - protocol: TCP
+      # Pod Port within the cluster
+      port: 9092
+      # targetPort is application listening port or containerPort
+      targetPort: 9092
+  type: NodePort
